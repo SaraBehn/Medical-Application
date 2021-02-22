@@ -1,5 +1,6 @@
 *.xcuserstate
 project.xcworkspace
+venv
 
 
 # Android/IntelliJ
