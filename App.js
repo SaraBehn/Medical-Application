@@ -148,14 +148,45 @@
 import "react-native-gesture-handler";
 import React from "react";
 import { StyleSheet } from "react-native";
-import { RootNavigator } from "./navigation/index";
+import { RootNavigator } from "./src/navigation/mainNavigator";
 import {NavigationContainer} from "@react-navigation/native";
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+
+
+const initialState = {
+    indexes:[]
+};
+
+function reducer(state = initialState, action) {
+    let new_indexes = state.indexes ? state.indexes : []
+
+    switch(action.type) {
+        case 'ADD_SENS':
+            new_indexes.push(action.index)
+            return {
+                indexes: new_indexes
+            };
+        case 'REMOVE_SENS':
+            new_indexes.splice(new_indexes.indexOf(action.index), 1)
+            return {
+                indexes: new_indexes
+            };
+        default:
+            return state;
+    }
+}
+
+const store = createStore(reducer);
+
 
 export default function App() {
     return (
-        <NavigationContainer>
-            <RootNavigator />
-        </NavigationContainer>
+        <Provider store={store}>
+            <NavigationContainer>
+                <RootNavigator />
+            </NavigationContainer>
+        </Provider>
     );
 }
 

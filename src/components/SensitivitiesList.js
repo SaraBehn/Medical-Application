@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {CheckBox} from 'react-native-elements'
 import {ScrollView, Text, View} from "react-native";
 import {useFocusEffect} from "@react-navigation/native";
+import { connect } from 'react-redux';
 
 let SENSITIVITIES = ["Lactose", "Corn starch", "PEG", "Povidone", "Carboxymethylcellulose", "Gelatin", "Brilliant blue dye",
     "Sunset Yellow FCF", "Allura red", "Propylene", "Indigo carmine", "Mannitol", "Sucrose", "Sodium benzoate", "Parabens",
@@ -10,28 +11,32 @@ let SENSITIVITIES = ["Lactose", "Corn starch", "PEG", "Povidone", "Carboxymethyl
     "Castor oil", "Cetyl alcohol", "Sulfite", "PEG castor oils", "Peanut oil", "Benzoic acid", "Corn syrup", "Sesame Oil",
     "Starch wheat", "Casein food", "Banana essence", "Milk", "Glucosamine", "New coccine", "Stearyl alcohol"]
 
-export default class SensitivitiesList extends React.Component {
+class SensitivitiesList extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {sens: new Array(SENSITIVITIES.len).fill(false), callback:this.props.callback};
-        this.state.sens[props.indexes] = true
+        this.state = {sens: new Array(SENSITIVITIES.length).fill(false)};
+        for(let i = 0; i < props.indexes.length; i++){
+            this.state.sens[props.indexes[i]] = true
+        }
     }
 
-    check(i) {
+    check = (index) => {
+        let type = this.state.sens[index] ? 'REMOVE_SENS' : 'ADD_SENS'
+        this.props.dispatch({state: this.state, type: type, index:index});
+
         let checkboxes = this.state.sens;
-        checkboxes[i] = !this.state.sens[i];
+        checkboxes[index] = !this.state.sens[index];
         this.setState({sens: checkboxes});
-        this.state.callback(i)
     }
 
     render() {
         let content = []
-        for (let i = 0; i < SENSITIVITIES.length; i++){
+        for (let index = 0; index < SENSITIVITIES.length; index++){
             content.push(<CheckBox
-                title={SENSITIVITIES[i]}
-                checked={this.state.sens[i]}
-                key={i}
-                onIconPress={() => this.check(i)}
+                title={SENSITIVITIES[index]}
+                checked={this.state.sens[index]}
+                key={index}
+                onIconPress={() => this.check(index)}
             />)
         }
         return (
@@ -42,8 +47,12 @@ export default class SensitivitiesList extends React.Component {
         );
     }
 
-    componentWillUnmount(){
-
-    }
-
 }
+
+function mapStateToProps(state) {
+    return {
+        indexes: state.indexes
+    };
+}
+
+export default connect(mapStateToProps)(SensitivitiesList);

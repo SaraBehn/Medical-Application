@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Card, Icon, Image } from 'react-native-elements';
 import { withNavigation } from '@react-navigation/native';
-import {images} from "../assets/imagesData"
+import {images} from "../../assets/imagesData"
 import {parseString} from 'react-native-xml2js';
 
 export default class AuthorList extends React.Component {

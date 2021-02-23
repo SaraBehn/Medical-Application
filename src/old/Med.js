@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View, Button} from 'react-native';
 import { Card, Icon, Image } from 'react-native-elements';
-import {images} from "../assets/imagesData"
+import {images} from "../../assets/imagesData"
 
 
 export default class Med extends React.Component {

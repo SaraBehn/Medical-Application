@@ -1,6 +1,7 @@
 *.xcuserstate
 project.xcworkspace
 venv
+.expo
 
 
 # Android/IntelliJ
