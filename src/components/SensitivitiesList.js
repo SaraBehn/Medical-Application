@@ -4,40 +4,72 @@ import {CheckBox} from 'react-native-elements'
 import {ScrollView, Text, View} from "react-native";
 import {useFocusEffect} from "@react-navigation/native";
 import { connect } from 'react-redux';
+import ls from 'local-storage'
 
-let SENSITIVITIES = ["Lactose", "Corn starch", "PEG", "Povidone", "Carboxymethylcellulose", "Gelatin", "Brilliant blue dye",
-    "Sunset Yellow FCF", "Allura red", "Propylene", "Indigo carmine", "Mannitol", "Sucrose", "Sodium benzoate", "Parabens",
-    "Aspartame", "Erythrosine", "Tartrazine", "Saccharin", "Poloxamer", "Soybean oil", "Benzyl alcohol", "Vanilla",
-    "Castor oil", "Cetyl alcohol", "Sulfite", "PEG castor oils", "Peanut oil", "Benzoic acid", "Corn syrup", "Sesame Oil",
-    "Starch wheat", "Casein food", "Banana essence", "Milk", "Glucosamine", "New coccine", "Stearyl alcohol"]
-
-class SensitivitiesList extends React.Component {
+export default class SensitivitiesList extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {sens: new Array(SENSITIVITIES.length).fill(false)};
-        for(let i = 0; i < props.indexes.length; i++){
-            this.state.sens[props.indexes[i]] = true
+        this.state = ({sens: this.props.route.params.sens, ids: this.props.route.params.ids, keyQueue: [], fetchInProgress:false})
+    }
+
+    check = (key) => {
+        let checkboxes = this.state.sens;
+        checkboxes[key] = !this.state.sens[key];
+        this.setState({sens: checkboxes});
+
+        let ids = this.state.ids
+
+        if (checkboxes[key] && !this.state.ids[key]) {
+            ids[key] = []
+            this.fetchData(key, 0, Number.MAX_SAFE_INTEGER, ids)
+            this.setState({ids: ids})
+        } else if (!checkboxes[key] && this.state.ids[key]) {
+            delete ids[key]
+            this.setState({ids: ids})
         }
     }
 
-    check = (index) => {
-        let type = this.state.sens[index] ? 'REMOVE_SENS' : 'ADD_SENS'
-        this.props.dispatch({state: this.state, type: type, index:index});
+    fetchData(key, skip, max, ids){
+        fetch("https://api.fda.gov/drug/label.json?search=inactive_ingredient:\"" + key + "\"&skip=" + skip + "&limit=1000")
+            .then(response => response.json())
+            .then(responseJSON => {
+                for(let entry in responseJSON.results) {
+                    if(ids[key]) {
+                        ids[key].push(responseJSON.results[entry].set_id)
+                    }
+                    else{
+                        return;
+                    }
+                }
+                if(skip + 1000 < max){
+                    this.fetchData(key, skip+1000, responseJSON.meta.results.total, ids)
+                } else {
+                    this.state.fetchInProgress = false
+                    console.log("done")
+                    this.setState({ids: ids})
+                    return;
+                }
+            })
+    }
 
-        let checkboxes = this.state.sens;
-        checkboxes[index] = !this.state.sens[index];
-        this.setState({sens: checkboxes});
+    componentWillUnmount() {
+        ls.set('sens', this.state.sens)
+        ls.set('bad_ids', this.state.ids)
     }
 
     render() {
         let content = []
-        for (let index = 0; index < SENSITIVITIES.length; index++){
+        for (const [key, value] of Object.entries(this.state.sens)) {
             content.push(<CheckBox
-                title={SENSITIVITIES[index]}
-                checked={this.state.sens[index]}
-                key={index}
-                onIconPress={() => this.check(index)}
+                title={key}
+                checked={value}
+                key={key}
+                onIconPress={() => this.check(key)}
             />)
+        }
+
+        for (let index = 0; index < this.state.sens.length; index++){
+
         }
         return (
             <ScrollView>
@@ -48,11 +80,3 @@ class SensitivitiesList extends React.Component {
     }
 
 }
-
-function mapStateToProps(state) {
-    return {
-        indexes: state.indexes
-    };
-}
-
-export default connect(mapStateToProps)(SensitivitiesList);

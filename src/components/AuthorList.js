@@ -4,6 +4,7 @@ import { Card, Icon, Image } from 'react-native-elements';
 import { withNavigation } from '@react-navigation/native';
 import {images} from "../../assets/imagesData"
 import {parseString} from 'react-native-xml2js';
+import {MedScreen} from "../screens/MedScreen"
 
 export default class AuthorList extends React.Component {
 
@@ -16,8 +17,8 @@ export default class AuthorList extends React.Component {
 
         return (
             <View>
-                <TouchableOpacity style = {styles.container} /*onPress={() => this.props.navigation.navigate('Med', {
-                    med: this.props.med})}*/
+                <TouchableOpacity style = {{color:this.props.status}} onPress={() => this.props.navigation.navigate('MedScreen', {
+                    med: this.props.med})}
                                   activeOpacity={0.5} >
                     <Card
                         style = {styles.card}

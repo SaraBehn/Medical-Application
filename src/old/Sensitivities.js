@@ -2,7 +2,7 @@ import React from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {CheckBox, SearchBar} from 'react-native-elements'
 import {ScrollView, Text, View} from "react-native";
-import MedList from "./MedList";
+import MedList from "../components/MedList";
 import {useFocusEffect} from "@react-navigation/native";
 
 

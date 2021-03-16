@@ -4,12 +4,12 @@ import SensitivitiesList from "../components/SensitivitiesList";
 
 const SensitivitiesScreen = ({navigation, route}) => {
 
-    let updateIndexes = (index) => {
+    let updateSens = (sens) => {
 
     };
     return (
         <View>
-            <SensitivitiesList indexes={[]} callback={updateIndexes}/>
+            <SensitivitiesList sens={[]} callback={updateSens}/>
         </View>
     )
 }

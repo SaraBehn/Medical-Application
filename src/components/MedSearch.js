@@ -14,7 +14,7 @@ import {parseString} from "react-native-xml2js";
 export default class MedSearch extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {medData: {}, search: '', dropdown: [], searching: false, controller: null};
+    this.state = {medData: {}, search: '', dropdown: []};
     this.query = this.query.bind(this);
     this.readData();
   }
@@ -43,6 +43,7 @@ export default class MedSearch extends React.Component {
             authors: [],
             inact_ing: [],
             act_ing: [],
+            ready: false,
           }
         }
         if(!this.state.medData[key].authors.includes(author)) {
@@ -64,7 +65,7 @@ export default class MedSearch extends React.Component {
       for(let key in this.state.medData) {
         let med = this.state.medData[key]
         if (med.key.startsWith(this.state.search.toLowerCase())) {
-          this.state.dropdown.push(key)
+          this.state.dropdown.push(med)
         }
       }
       this.setState({search: this.state.search, dropdown: this.state.dropdown})
@@ -74,10 +75,15 @@ export default class MedSearch extends React.Component {
   }
 
   analyze_ingredients(med){
+    if(med.ready){
+      return;
+    }
+
+    let newMed = med
     let inac = []
     let ac = []
-    for(let j = 0; j < med.setId.length; j++) {
-      fetch("https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/" + med.setId[j] + ".xml")
+    for(let j = 0; j < newMed.setId.length; j++) {
+      fetch("https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/" + newMed.setId[j] + ".xml")
           .then(response => response.text())
           .then(xml => {
             parseString(xml, function (err, result) {
@@ -102,86 +108,18 @@ export default class MedSearch extends React.Component {
               ac = activeIng
             })
           }).finally(() => {
-        med.act_ing.push(inac)
-        med.inact_ing.push(ac)
+        newMed.act_ing.push(inac)
+        newMed.inact_ing.push(ac)
+      }).then(temp => {
+        if (j === newMed.setId.length - 1){
+          newMed.ready = true
+          let ah = this.state.medData
+          ah[newMed.key] = newMed
+          this.setState({medData:ah})
+      }
       })
     }
   }
-
-  processTitle(title){
-    // if(!title) {
-    //   return title;
-    // }
-    // let name = ""
-    // let author = ""
-    // for (let i = 1; i < title.length; i++){
-    //   if(title.charAt(i) === '(' || title.charAt(i) === ')'){
-    //       name += "\n"
-    //   } else if(title.charAt(i) === ' ' && title.charAt(i-1) === ')') {
-    //     continue;
-    //   } else if(title.charAt(i) === '[') {
-    //     author = title.slice(i+1, title.length-1)
-    //     break;
-    //   } else {
-    //     name += title[i];
-    //   }
-    // }
-    // return [name, author]
-  }
-
-  // fetchMeds(page) {
-  //   var dict = {}
-  //   if(page !== "null") {
-  //     fetch("https://dailymed.nlm.nih.gov/dailymed/services/v2/spls.json?page=" + page)
-  //         .then(response => response.json())
-  //         .then(responseJSON => {
-  //           for (var i = 0; i < responseJSON.metadata.elements_per_page; i++) {
-  //             var id = responseJSON.data[i].setid;
-  //             fetch("https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/" + id + ".xml")
-  //                 .then(response => response.text())
-  //                 .then(xml => {
-  //                   parseString(xml, function (err, result) {
-  //                       JSON.stringify(result);
-  //                       try {
-  //                           result.document.component[0].structuredBody[0].component[0].section[0].subject[0].manufacturedProduct[0].manufacturedProduct[0].name[0]._;
-  //                       } catch {
-  //                           console.log(id);
-  //                       }
-  //                       const name = result.document.component[0].structuredBody[0].component[0].section[0].subject[0].manufacturedProduct[0].manufacturedProduct[0].name[0]._;
-  //                       const author = result.document.author[0].assignedEntity[0].representedOrganization[0].name[0];
-  //                       const allIng = result.document.component[0].structuredBody[0].component[0].section[0].subject[0].manufacturedProduct[0].manufacturedProduct[0].ingredient;
-  //                       const activeIng = [];
-  //                       const inactiveIng = [];
-  //                       if(allIng) {
-  //                           for (var i = 0; i < allIng.length; i++) {
-  //                               const classCode = allIng[i].$["classCode"]
-  //                               const ingName = allIng[i].ingredientSubstance[0].name[0];
-  //
-  //                               if (classCode.substring(0, 3) === "ACT") {
-  //                                   activeIng.push(ingName)
-  //                               } else if (classCode === "IACT") {
-  //                                   inactiveIng.push(ingName);
-  //                               } else {
-  //                                   console.log("Unknown ingredient class code:" + allIng[i].$["classCode"]);
-  //                               }
-  //                           }
-  //                       }
-  //                           if(dict[name] !== undefined) {
-  //                               dict[name] = ({
-  //                                   name: name,
-  //                                   author: author,
-  //                                   activeIng: activeIng,
-  //                                   inactiveIng: inactiveIng
-  //                               });
-  //                           }
-  //                   })
-  //                 });
-  //           }
-  //           console.log(responseJSON.metadata.next_page);
-  //           this.fetchMeds(responseJSON.metadata.next_page);
-  //         }).done(console.log(dict));
-  //   }
-  // }
 
   render() {
     let content = null
@@ -193,16 +131,23 @@ export default class MedSearch extends React.Component {
         content = <Text style={{textAlign: 'center'}}>Search any medicine you want</Text>
       } else {
         meds = this.state.dropdown.sort((function(a, b){
-          return a.length - b.length;
+          if (a.ready && b.ready){
+            return a.key.length - b.key.length;
+          } else if(a.ready) {
+            return -1;
+          } else
+          return 1;
         })).slice(0, 10)
         content = []
-        meds.forEach(med => this.analyze_ingredients(this.state.medData[med]))
-        meds.forEach(med =>
-            content.push(<MedList
-            med={this.state.medData[med]}
-            key={this.state.medData[med].setId}
-            navigation={this.props.navigation}
-        />))
+        meds.forEach(med => this.analyze_ingredients(med))
+        meds.forEach(med => {
+        if (med.ready) {
+          content.push(<MedList
+              med={med}
+              key={med.setId}
+              navigation={this.props.navigation}
+          />)
+        }})
       }
     }
     return (

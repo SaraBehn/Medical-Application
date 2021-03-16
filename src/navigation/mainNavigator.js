@@ -13,13 +13,13 @@ const RootNavigator = () => (
             tabBarColor: "#00009c"
         }}
     >
-        <AppBottomNavigator.Screen
-            name="Profile"
-            children={AccountStackNavigator}
-            options={{
-                tabBarIcon: () => <Icon name="user" size={25} color="#fff" />
-            }}
-        />
+        {/*<AppBottomNavigator.Screen*/}
+        {/*    name="Profile"*/}
+        {/*    children={AccountStackNavigator}*/}
+        {/*    options={{*/}
+        {/*        tabBarIcon: () => <Icon name="user" size={25} color="#fff" />*/}
+        {/*    }}*/}
+        {/*/>*/}
         <AppBottomNavigator.Screen
             name="Search"
             children={SearchStackNavigator}

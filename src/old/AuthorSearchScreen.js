@@ -1,17 +1,16 @@
 import React from 'react'
-import {View, Text, ScrollView, StyleSheet} from 'react-native'
-import MedSearch from "../components/MedSearch";
+import {View, Text, StyleSheet} from 'react-native'
+import AuthorSearch from "../components/AuthorSearch";
 
-const MedSearchScreen = ({navigation, route}) => {
-    console.log(route.params.query)
+const AuthorSearchScreen = ({navigation, route}) => {
     return (
         <View style={styles.container}>
-            <MedSearch navigation={navigation}/>
+            <AuthorSearch navigation={navigation} med={route.params.med}/>
         </View>
     );
 }
 
-export default MedSearchScreen
+export default AuthorSearchScreen
 
 const styles = StyleSheet.create({
     container: {
