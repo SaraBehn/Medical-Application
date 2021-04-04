@@ -9,7 +9,7 @@ import ls from 'local-storage'
 export default class SensitivitiesList extends React.Component {
     constructor(props) {
         super(props);
-        this.state = ({sens: this.props.route.params.sens, ids: this.props.route.params.ids, keyQueue: [], fetchInProgress:false})
+        this.state = ({sens: this.props.route.params.sens, ids: this.props.route.params.ids, fetchInProgress:false, unmounted:false})
     }
 
     check = (key) => {
@@ -46,13 +46,18 @@ export default class SensitivitiesList extends React.Component {
                 } else {
                     this.state.fetchInProgress = false
                     console.log("done")
-                    this.setState({ids: ids})
+                    if(this.state.unmounted){
+                        ls.set('bad_ids', ids)
+                    } else {
+                        this.setState({ids: ids})
+                    }
                     return;
                 }
             })
     }
 
     componentWillUnmount() {
+        this.state.unmounted = true
         ls.set('sens', this.state.sens)
         ls.set('bad_ids', this.state.ids)
     }

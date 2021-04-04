@@ -1,23 +1,24 @@
 import React from "react";
-import {ScrollView, Text, TouchableOpacity, View} from "react-native";
-import {Card} from "react-native-elements";
+import {ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {Card, SearchBar} from "react-native-elements";
 
 
 export default class MedList extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {meds:{}, bad_ids:this.props.route.params.bad_ids}
+    this.state = {meds:{}, bad_ids:this.props.route.params.bad_ids, query:""}
     this.getMeds(this.props.route.params.query)
   }
 
   getMeds(query){
-    fetch("https://api.fda.gov/drug/drugsfda.json?search=products.active_ingredients.name:"+query+ "+AND+products.marketing_status:Over-the-counter&limit=100")
+    fetch("https://api.fda.gov/drug/drugsfda.json?search=products.active_ingredients.name:"+query.toLowerCase()+"+AND+products.marketing_status:Over-the-counter&limit=100")
         .then(response => response.json())
         .then(responseJSON => {
-          let ids = {}
+          console.log(query)
+          let info = {}
           for(let result = 0; result < responseJSON.results.length; result++){
             let core = responseJSON.results[result].openfda
-            if(core) {
+            if(core && core.brand_name) {
               for (let i = 0; i < core.brand_name.length; i++) {
                 if(core.brand_name[i] !== query) {
                   let flag = true
@@ -27,10 +28,9 @@ export default class MedList extends React.Component {
                     }
                   })
                   if (flag) {
-                    ids[core.brand_name[i]] = core.spl_set_id[i]
+                    info[core.brand_name[i]] = [core.manufacturer_name[i], core.spl_set_id[i]]
                   } else{
                     console.log("not okay: " + core.brand_name[i])
-
                   }
                 }
               }
@@ -38,7 +38,7 @@ export default class MedList extends React.Component {
               console.log("bad result:" + result)
             }
           }
-          this.setState({meds: ids})
+          this.setState({meds: info})
         })
   }
 
@@ -54,21 +54,33 @@ export default class MedList extends React.Component {
 
   render(){
     let content = []
-    Object.entries(this.state.meds).forEach(([name, id]) => {
+    Object.entries(this.state.meds).forEach(([name, info]) => {
+      if(name.toLowerCase().startsWith(this.state.query.toLowerCase())) {
       content.push(<View key={name}>
-        <TouchableOpacity onPress={() => this.props.navigation.push('AuthorSearchScreen', {})} activeOpacity={0.5} >
+        <TouchableOpacity onPress={() => this.props.navigation.push('Med', {name:name, set_id:info[1]})} activeOpacity={0.5} >
           <Card title={name}>
             <View style={{flexDirection: "row"}}>
               <View style={{ width: 0, flexGrow: 1, flex: 1,}}>
                 <Text style={{fontWeight: 'bold'}}>{this.capitalize(name)}</Text>
+                <Text>{this.capitalize(info[0])}</Text>
               </View>
             </View>
           </Card>
         </TouchableOpacity>
-      </View>)
+      </View>) }
     });
     return(
-        <View>
+        <View style={styles.container}>
+          <Text>Showing medicines with the active ingredient {this.props.route.params.query.toLowerCase()}</Text>
+          <SearchBar
+              placeholder="Filter the list of meds"
+              lightTheme = {true}
+              inputContainerStyle = {styles.inputBar}
+              containerStyle = {styles.searchBarContainer}
+              onChangeText = {query => this.setState({query: query})}
+              round
+              value = {this.state.query}
+          />
           <ScrollView>
             {content}
           </ScrollView>
@@ -79,6 +91,33 @@ export default class MedList extends React.Component {
 
 }
 
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#F5FCFF'
+  },
+
+  inputBar: {
+    backgroundColor: '#F5FCFF',
+  },
+
+  button: {
+    flex: 20,
+  },
+
+  text: {
+    flex:20
+  },
+
+  contentContainer: {
+    flex: 20,
+    marginTop: '10%',
+    marginBottom: '2%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF',
+    flexDirection: 'row',
+  }
+});
 
 
 
