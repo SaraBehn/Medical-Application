@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View, Button} from 'react-native';
 import { Card, Icon, Image } from 'react-native-elements';
-import {images} from "../../assets/imagesData"
+import {images} from "../../old/assets/imagesData"
 import { Title, RadioButton, Subheading, Searchbar, Divider, Surface, Paragraph} from 'react-native-paper';
 import HTML from "react-native-render-html";
 

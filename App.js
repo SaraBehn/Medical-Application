@@ -5,9 +5,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import HomeScreen from "./src/screens/HomeScreen"
-import MedListScreen from "./src/screens/MedListScreen"
-import SensitivitiesScreen from "./src/screens/SensitivitiesScreen"
+import Home from "./src/screens/Home"
 import MedList from "./src/components/MedList"
 import SensitivitiesList from "./src/components/SensitivitiesList";
 import Med from "./src/components/Med"
@@ -19,10 +17,10 @@ function App() {
         <PaperProvider>
             <NavigationContainer>
                 <Stack.Navigator>
-                    <Stack.Screen name="HomeScreen" component={HomeScreen} />
-                    <Stack.Screen name="MedList" component={MedList}/>
-                    <Stack.Screen name="Med" component={Med}/>
-                    <Stack.Screen name="SensitivitiesList" component={SensitivitiesList} />
+                    <Stack.Screen name="Home" component={Home} />
+                    <Stack.Screen name="List" component={MedList}/>
+                    <Stack.Screen name="Medicine Info" component={Med}/>
+                    <Stack.Screen name="Sensitivities List" component={SensitivitiesList} />
                 </Stack.Navigator>
             </NavigationContainer>
         </PaperProvider>

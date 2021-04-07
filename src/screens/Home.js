@@ -1,14 +1,12 @@
 import React from 'react'
 import {View, Text, ScrollView, StyleSheet, Button} from 'react-native'
-import MedList from "../components/MedList";
-import MedListScreen from "./MedListScreen";
 import ls from 'local-storage';
 import { Title, RadioButton, Subheading, Searchbar, Divider, Surface} from 'react-native-paper';
 
-export default class HomeScreen extends React.Component {
+export default class Home extends React.Component {
     constructor(props) {
         super(props);
-        this.state = ({query:"", active:'', sens:ls.get('sens')|| {"Lactose":false,
+        this.state = ({query:"", sens:ls.get('sens')|| {"Lactose":false,
             "Corn starch":false,
             "PEG":false,
             "Povidone":false,
@@ -46,43 +44,19 @@ export default class HomeScreen extends React.Component {
             "Glucosamine":false,
             "New coccine":false,
             "Stearyl alcohol":false,
-        }, bad_ids:ls.get('bad_ids') || {}})
-        this.getList = this.getList.bind(this)
+        }, bad_ids:ls.get('bad_ids') || {"fetchInProgress":false}})
     }
 
-    getActiveIngredients(name){
-        fetch("https://api.fda.gov/drug/drugsfda.json?search=products.brand_name.exact:\"" + name.toUpperCase() + "\"")
-            .then(response => response.json())
-            .then(responseJSON => {
-                let active_ing = responseJSON.results[0].openfda.substance_name[0]
-                this.props.navigation.push('MedList', {query:active_ing, bad_ids:this.state.bad_ids})
-            })
-    }
-
-    getList(){
-        if(this.state.active==='active'){
-            this.props.navigation.push('MedList', {query:this.state.query, bad_ids:this.state.bad_ids})
-        } else if(this.state.active==="similar"){
-            this.getActiveIngredients(this.state.query)
-        } else{
-        }
+    waitAndGo(){
+        if(this.state.bad_ids["fetchInProgress"])
+        this.props.navigation.push('List', {query:this.state.query, bad_ids:this.state.bad_ids})
     }
 
     render(){
+        console.log(this.state.bad_ids["fetchInProgress"])
         return (
             <View style={styles.container}>
-            {/*//     <Surface style={styles.surface}>*/}
-
-                {/*<View style={styles.surface}>*/}
-                <Title>Search by:</Title>
-                <RadioButton.Group onValueChange={value => {this.setState({active:value})}} value={this.state.active}>
-                    <RadioButton.Item label="Active ingredient" value={'active'} />
-                    <RadioButton.Item label="Similar medicine (Input the name of a medicine, and we'll find others with the same active ingredient)" value={'similar'} />
-                    <RadioButton.Item label="Medicine name" value={'name'} />
-
-                </RadioButton.Group>
-                    {/*</View>*/}
-                {/*<Divider />*/}
+                <Title>Search for a medicine or active ingredient:</Title>
                 <Searchbar
                     onChangeText = {query => this.setState({query: query})}
                     round
@@ -90,17 +64,15 @@ export default class HomeScreen extends React.Component {
                 />
                 <Button
                     center
-                    onPress={this.getList}
+                    onPress={this.waitAndGo}
                     title="Search"
                 />
-                {/*<Divider />*/}
                 <Button
                     style={styles.button}
                     center
-                    onPress={() => this.props.navigation.push('SensitivitiesList', {sens:this.state.sens, ids:this.state.bad_ids})}
+                    onPress={() => this.props.navigation.push('Sensitivities List', {sens:this.state.sens, ids:this.state.bad_ids})}
                     title="Update your sensitivities"
                 />
-                {/*</Surface>*/}
 
             </View>
         )

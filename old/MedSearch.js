@@ -3,8 +3,8 @@
 import React, {Component} from 'react';                                         //imports
 import {Platform, StyleSheet, Text, View, ScrollView} from 'react-native';
 import { SearchBar, Image} from 'react-native-elements';
-import MedList from "./MedList";
-import data from "../../assets/dm_spl_zip_files_meta_data";
+import MedList from "../src/components/MedList";
+import data from "./assets/dm_spl_zip_files_meta_data";
 import {parseString} from "react-native-xml2js";
 
 //TODO: cache recent meds

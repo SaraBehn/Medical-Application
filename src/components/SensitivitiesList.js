@@ -6,10 +6,50 @@ import {useFocusEffect} from "@react-navigation/native";
 import { connect } from 'react-redux';
 import ls from 'local-storage'
 
+let name_table = {"Lactose":"lactose",
+    "Corn starch":"Corn starch",
+    "PEG":"PEG",
+    "Povidone":"Povidone",
+    "Carboxymethylcellulose":"Carboxymethylcellulose",
+    "Gelatin":"Gelatin",
+    "Brilliant blue dye":"blue",
+    "Sunset Yellow FCF":"yellow",
+    "Allura red":"red",
+    "Propylene":"Propylene",
+    "Indigo carmine":"Indigo",
+    "Mannitol":"Mannitol",
+    "Sucrose":"Sucrose",
+    "Sodium benzoate":"Sodium benzoate",
+    "Parabens":"Parabens",
+    "Aspartame":"Aspartame",
+    "Erythrosine":"red",
+    "Tartrazine":"Tartrazine",
+    "Saccharin":"Saccharin",
+    "Poloxamer":"Poloxamer",
+    "Soybean oil":"Soybean",
+    "Benzyl alcohol":"Benzyl",
+    "Vanilla":"Vanilla",
+    "Castor oil":"Castor oil",
+    "Cetyl alcohol":"Cetyl",
+    "Sulfite":"Sulfite",
+    "PEG castor oils":"castor",
+    "Peanut oil":"Peanut",
+    "Benzoic acid":"Benzoic",
+    "Corn syrup":"Corn",
+    "Sesame Oil":"Sesame",
+    "Starch wheat":"wheat",
+    "Casein food":"Casein",
+    "Banana essence":"Banana",
+    "Milk":"Milk",
+    "Glucosamine":"Glucosamine",
+    "New coccine":"red",
+    "Stearyl alcohol":"Stearyl alcohol",
+}
+
 export default class SensitivitiesList extends React.Component {
     constructor(props) {
         super(props);
-        this.state = ({sens: this.props.route.params.sens, ids: this.props.route.params.ids, fetchInProgress:false, unmounted:false})
+        this.state = ({sens: this.props.route.params.sens, ids: this.props.route.params.ids, unmounted:false})
     }
 
     check = (key) => {
@@ -21,6 +61,7 @@ export default class SensitivitiesList extends React.Component {
 
         if (checkboxes[key] && !this.state.ids[key]) {
             ids[key] = []
+            ids["fetchInProgress"] = true
             this.fetchData(key, 0, Number.MAX_SAFE_INTEGER, ids)
             this.setState({ids: ids})
         } else if (!checkboxes[key] && this.state.ids[key]) {
@@ -30,28 +71,23 @@ export default class SensitivitiesList extends React.Component {
     }
 
     fetchData(key, skip, max, ids){
-        fetch("https://api.fda.gov/drug/label.json?search=inactive_ingredient:\"" + key + "\"&skip=" + skip + "&limit=1000")
+        fetch("https://api.fda.gov/drug/label.json?search=inactive_ingredient:\"" + name_table[key] + "\"&skip=" + skip + "&limit=1000")
             .then(response => response.json())
             .then(responseJSON => {
                 for(let entry in responseJSON.results) {
                     if(ids[key]) {
                         ids[key].push(responseJSON.results[entry].set_id)
                     }
-                    else{
-                        return;
-                    }
                 }
                 if(skip + 1000 < max){
                     this.fetchData(key, skip+1000, responseJSON.meta.results.total, ids)
                 } else {
-                    this.state.fetchInProgress = false
-                    console.log("done")
+                    ids["fetchInProgress"] = false
                     if(this.state.unmounted){
                         ls.set('bad_ids', ids)
                     } else {
                         this.setState({ids: ids})
                     }
-                    return;
                 }
             })
     }
@@ -69,12 +105,8 @@ export default class SensitivitiesList extends React.Component {
                 title={key}
                 checked={value}
                 key={key}
-                onIconPress={() => this.check(key)}
+                onPress={() => this.check(key)}
             />)
-        }
-
-        for (let index = 0; index < this.state.sens.length; index++){
-
         }
         return (
             <ScrollView>

@@ -1,6 +1,6 @@
 import React from 'react'
 import {View, Text, StyleSheet} from 'react-native'
-import AuthorSearch from "../components/AuthorSearch";
+import AuthorSearch from "../src/components/AuthorSearch";
 
 const AuthorSearchScreen = ({navigation, route}) => {
     return (
