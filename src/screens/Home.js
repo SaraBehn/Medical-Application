@@ -45,11 +45,14 @@ export default class Home extends React.Component {
             "New coccine":false,
             "Stearyl alcohol":false,
         }, bad_ids:ls.get('bad_ids') || {"fetchInProgress":false}})
+        this.waitAndGo = this.waitAndGo.bind(this)
     }
 
     waitAndGo(){
-        if(this.state.bad_ids["fetchInProgress"])
-        this.props.navigation.push('List', {query:this.state.query, bad_ids:this.state.bad_ids})
+        while(this.state.bad_ids["fetchInProgress"]) {
+            this.forceUpdate()
+        }
+        this.props.navigation.push('List', {query: this.state.query, bad_ids: this.state.bad_ids})
     }
 
     render(){

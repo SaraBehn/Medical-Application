@@ -43,7 +43,7 @@ export default class MedList extends React.Component {
           for (let i = 0; i < core.brand_name.length; i++) {
             let flag = true
             Object.entries(this.state.bad_ids).forEach(([name, bad_ids]) => {
-              if (bad_ids.includes(core.spl_set_id[i])) {
+              if (name !== "fetchInProgress" && bad_ids.includes(core.spl_set_id[i])) {
                 flag = false
               }
             })

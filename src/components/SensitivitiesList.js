@@ -1,9 +1,6 @@
 import React from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {CheckBox} from 'react-native-elements'
 import {ScrollView, Text, View} from "react-native";
-import {useFocusEffect} from "@react-navigation/native";
-import { connect } from 'react-redux';
 import ls from 'local-storage'
 
 let name_table = {"Lactose":"lactose",

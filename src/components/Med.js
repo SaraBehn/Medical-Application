@@ -23,13 +23,12 @@ export default class Med extends React.Component {
   }
 
   capitalize (text) {
-      // if(text) {
-      //     let n = text.toLowerCase()
-      //         .split(' ')
-      //         .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-      //         .join(' ');
-      //     return n
-      // }
+      if(text) {
+          return text.toLowerCase()
+              .split(' ')
+              .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+              .join(' ');
+      }
       return text
   };
 
@@ -39,7 +38,6 @@ export default class Med extends React.Component {
       for(let name in this.state.sub_name){
           sub_names.push(<Subheading key={name}>{this.state.sub_name[name]}</Subheading>)
       }
-
     return (
         <View>
             <Title>{this.capitalize(this.props.route.params.name)}</Title>
